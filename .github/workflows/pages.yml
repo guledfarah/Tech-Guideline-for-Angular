@@ -151,9 +151,4 @@ jobs:
           });
           "
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          force_orphan: true # This ensures a clean deployment
+      # We don't need the deploy step since we're serving directly from master/docs
