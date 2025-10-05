@@ -30,7 +30,7 @@ jobs:
         run: |
           # First copy the index.html
           cp src/index.html docs/
-          
+
           node -e "
           const fs = require('fs');
           const marked = require('marked');
