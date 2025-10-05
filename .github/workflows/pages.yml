@@ -8,6 +8,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # This is required for pushing to the repo
+      pages: write # This is required for deploying to GitHub Pages
+      id-token: write # This is required for requesting the deployment
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -152,4 +156,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
-          keep_files: true
+          force_orphan: true # This ensures a clean deployment
