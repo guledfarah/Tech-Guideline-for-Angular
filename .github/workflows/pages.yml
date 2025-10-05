@@ -32,11 +32,11 @@ jobs:
 
       - name: Convert Markdown to HTML and copy index
         run: |
-          # First copy the index.html
-          cp -v src/index.html docs/
+          # Copy index.html from root
+          cp -v index.html docs/
 
           # List contents to verify
-          ls -la src/
+          ls -la ./
           ls -la docs/
 
           node -e "
