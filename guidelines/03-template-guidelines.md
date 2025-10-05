@@ -28,6 +28,212 @@
 </div>
 ```
 
+### ✅ Do: Use Dedicated Selector Files for State Management
+
+```typescript
+// user-profile.selector.ts
+export interface UserProfileState {
+  isEditable: boolean;
+  hasPremiumAccess: boolean;
+  userStatus: UserStatus;
+  displayName: string;
+  avatarUrl: string;
+  stats: UserStats;
+}
+
+@Injectable()
+export class UserProfileSelectors {
+  // Store selectors
+  private readonly user$ = this.store.select(selectUser);
+  private readonly permissions$ = this.store.select(selectUserPermissions);
+  private readonly subscription$ = this.store.select(selectUserSubscription);
+  private readonly preferences$ = this.store.select(selectUserPreferences);
+
+  constructor(private readonly store: Store) {}
+
+  // Main state selector combining all state computations
+  readonly state = computed<UserProfileState | null>(() => {
+    const user = this.user$();
+    const permissions = this.permissions$();
+    const subscription = this.subscription$();
+    const preferences = this.preferences$();
+
+    if (!user || !permissions) return null;
+
+    return {
+      isEditable: this.canEdit(permissions),
+      hasPremiumAccess: this.checkPremiumAccess(subscription),
+      userStatus: this.determineUserStatus(user, subscription),
+      displayName: this.formatDisplayName(user, preferences),
+      avatarUrl: this.getAvatarUrl(user, subscription),
+      stats: this.computeUserStats(user),
+    };
+  });
+
+  private canEdit(permissions: string[]): boolean {
+    return permissions.includes("edit");
+  }
+
+  private checkPremiumAccess(subscription: Subscription | null): boolean {
+    return subscription?.type === "premium" && !subscription.isExpired;
+  }
+
+  private determineUserStatus(
+    user: User,
+    subscription: Subscription | null
+  ): UserStatus {
+    if (!user.isVerified) return "unverified";
+    if (!subscription) return "inactive";
+    if (subscription.isExpired) return "expired";
+    return "active";
+  }
+
+  private formatDisplayName(user: User, preferences: UserPreferences): string {
+    return preferences?.useFullName
+      ? `${user.firstName} ${user.lastName}`
+      : user.username;
+  }
+
+  private getAvatarUrl(user: User, subscription: Subscription | null): string {
+    return subscription?.type === "premium"
+      ? user.avatarUrl
+      : this.getDefaultAvatar(user);
+  }
+
+  private computeUserStats(user: User): UserStats {
+    return {
+      totalPosts: user.posts.length,
+      engagement: this.calculateEngagement(user.posts),
+      memberSince: this.formatDate(user.joinDate),
+    };
+  }
+}
+
+// user-profile.component.ts
+@Component({
+  selector: "app-user-profile",
+  template: `
+    @if (state(); as vm) {
+    <app-user-details
+      [isEditable]="vm.isEditable"
+      [hasPremiumAccess]="vm.hasPremiumAccess"
+      [status]="vm.userStatus"
+    >
+      <app-user-header
+        [displayName]="vm.displayName"
+        [avatarUrl]="vm.avatarUrl"
+      >
+      </app-user-header>
+      <app-user-stats [stats]="vm.stats"></app-user-stats>
+    </app-user-details>
+    }
+  `,
+  providers: [UserProfileSelectors], // Scoped to this component
+})
+export class UserProfileComponent {
+  // Clean component with just the state from selector
+  protected readonly state = inject(UserProfileSelectors).state;
+}
+```
+
+### ❌ Don't: Perform Logic Checks in Templates
+
+```typescript
+// Bad: Multiple logic checks in template
+@Component({
+  template: `
+    <!-- Bad: Multiple conditions and negative checks -->
+    @if (user() && !isLoading()) {
+      @if (hasPermission('edit') && !isLocked()) {
+        <app-user-editor [user]="user()" />
+      }
+      @if (!hasSubscription() || subscription()?.isExpired) {
+        <app-upgrade-prompt />
+      }
+    }
+  `,
+})
+export class BadUserProfileComponent {
+  // Bad: Logic spread across multiple properties
+  user = signal<User | null>(null);
+  isLoading = signal(true);
+  subscription = signal<Subscription | null>(null);
+
+  hasPermission(permission: string) {
+    return this.permissions().includes(permission);
+  }
+
+  // Bad: Template needs to handle multiple conditions
+}
+
+// Good: Refactored with component-level selectors
+@Component({
+  template: `
+    @if (viewModel(); as vm) {
+      @if (vm.showEditor) {
+        <app-user-editor [user]="vm.user" />
+      }
+      @if (vm.showUpgradePrompt) {
+        <app-upgrade-prompt />
+      }
+    }
+  `,
+})
+export class GoodUserProfileComponent {
+  protected readonly viewModel = computed(() => {
+    const user = this.user();
+    if (!user || this.isLoading()) return null;
+
+    return {
+      user,
+      showEditor: this.canEdit(),
+      showUpgradePrompt: this.needsUpgrade(),
+    };
+  });
+
+  // Encapsulated logic in component-level selectors
+  private readonly canEdit = computed(
+    () => this.hasPermission("edit") && !this.isLocked()
+  );
+
+  private readonly needsUpgrade = computed(() => {
+    const sub = this.subscription();
+    return !sub || sub.isExpired;
+  });
+}
+```
+
+### ✅ Do: Create Clear View Models with Positive Conditions
+
+```typescript
+// Good: Clear, positive conditions in view model
+@Component({
+  template: `
+    @if (viewModel(); as vm) {
+    <app-user-card
+      [isActive]="vm.isActive"
+      [displayName]="vm.displayName"
+      [accessLevel]="vm.accessLevel"
+    >
+    </app-user-card>
+    }
+  `,
+})
+export class UserCardComponent {
+  protected readonly viewModel = computed(() => {
+    const user = this.user();
+    const settings = this.settings();
+    if (!user || !settings) return null;
+
+    return {
+      isActive: this.determineActiveStatus(user),
+      displayName: this.formatDisplayName(user, settings),
+      accessLevel: this.calculateAccessLevel(user),
+    };
+  });
+}
+```
+
 ## A11y Best Practices
 
 ### ✅ Do: Use Semantic HTML and ARIA Attributes
@@ -131,11 +337,85 @@
 
 ### ✅ Do: Use TrackBy with NgFor
 
+````html
+### ✅ Do: Use Modern Control Flow Syntax ```html
+<!-- Using @if -->
+@if (user(); as currentUser) {
+<user-profile [data]="currentUser" />
+} @else {
+<login-prompt />
+}
+
+<!-- Using @for with track -->
+@for (item of items(); track item.id) {
+<app-item [data]="item" />
+} @empty {
+<no-items-placeholder />
+}
+
+<!-- Using @switch -->
+@switch (status()) { @case ('loading') {
+<loading-spinner />
+} @case ('error') {
+<error-message [error]="error()" />
+} @default {
+<content-view />
+} }
+
+<!-- Complex iterations with computed values -->
+@for ( item of sortedItems(); track item.id; let i = $index; let isFirst =
+$first; let isLast = $last ) {
+<app-item [data]="item" [isFirst]="isFirst" [isLast]="isLast" [position]="i" />
+}
+````
+
+### ❌ Don't: Use Legacy *ngIf, *ngFor Directives
+
 ```html
+<!-- Bad: Using old structural directives -->
+<div *ngIf="user$ | async as user">
+  <user-profile [data]="user"></user-profile>
+</div>
+
 <div *ngFor="let item of items$ | async; trackBy: trackById">
-  <app-item [item]="item"></app-item>
+  <app-item [data]="item"></app-item>
+</div>
+
+<!-- Bad: Nested structural directives -->
+<div *ngIf="items">
+  <div *ngFor="let item of items">
+    <div *ngIf="item.isVisible">{{ item.name }}</div>
+  </div>
+</div>
+
+<!-- Bad: Complex computations in template -->
+<div *ngFor="let order of orders">
+  {{ calculateComplexTotal(order) | currency }}
+  <span>{{ getFormattedDate(order.date) }}</span>
 </div>
 ```
+
+### ✅ Do: Leverage Control Flow Features
+
+```html
+<!-- Better readability with @if/@for -->
+@if (items(); as itemList) { @for (item of itemList; track item.id) { @if
+(item.isVisible) {
+<app-item [data]="item" />
+} } } @else {
+<no-items-placeholder />
+}
+
+<!-- Using computed values -->
+@for (order of sortedOrders(); track order.id) {
+<order-item
+  [total]="orderTotals()[order.id]"
+  [date]="formattedDates()[order.id]"
+/>
+}
+```
+
+````
 
 ### ❌ Don't: Perform Heavy Computations in Template
 
@@ -145,7 +425,7 @@
   {{ calculateComplexTotal(order) | currency }}
   <span>{{ getFormattedDate(order.date) }}</span>
 </div>
-```
+````
 
 ## Template References
 
