@@ -30,7 +30,7 @@ jobs:
         run: |
           # First copy the index.html
           cp -v src/index.html docs/
-          
+
           # List contents to verify
           ls -la src/
           ls -la docs/
@@ -146,10 +146,6 @@ jobs:
             );
           });
           "
-
-      - name: Copy index.html to docs
-        run: |
-          cp index.html docs/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
