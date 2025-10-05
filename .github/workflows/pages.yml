@@ -1,154 +1,43 @@
-name: GitHub Pages
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
 
 on:
+  # Runs on pushes targeting the default branch
   push:
-    branches:
-      - master # Set this to your default branch
+    branches: ["master"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
+  # Single deploy job since we're just deploying
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # This is required for pushing to the repo
-      pages: write # This is required for deploying to GitHub Pages
-      id-token: write # This is required for requesting the deployment
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          node-version: "18"
-
-      - name: Install marked (for markdown conversion)
-        run: npm install marked
-
-      - name: Create docs structure
-        run: |
-          mkdir -p docs/guidelines docs/process
-          # Clean any existing files in docs directory except .gitkeep
-          find docs -type f ! -name '.gitkeep' -delete
-
-      - name: Convert Markdown to HTML and copy index
-        run: |
-          # Copy index.html from root
-          cp -v index.html docs/
-
-          # List contents to verify
-          ls -la ./
-          ls -la docs/
-
-          node -e "
-          const fs = require('fs');
-          const marked = require('marked');
-          const path = require('path');
-
-          // Function to create directory if it doesn't exist
-          function ensureDirectoryExists(dirPath) {
-            if (!fs.existsSync(dirPath)) {
-              fs.mkdirSync(dirPath, { recursive: true });
-            }
-          }
-
-          // Function to convert markdown file to HTML
-          function convertToHtml(mdPath, targetPath) {
-            const md = fs.readFileSync(mdPath, 'utf-8');
-            const html = marked.parse(md);
-            const template = fs.readFileSync('template.html', 'utf-8');
-            
-            // Ensure target directory exists
-            ensureDirectoryExists(path.dirname(targetPath));
-            
-            fs.writeFileSync(targetPath, template.replace('{{content}}', html));
-          }
-
-          // Create docs directory structure
-          ensureDirectoryExists('docs/guidelines');
-          ensureDirectoryExists('docs/process');
-
-          // Create template.html
-          fs.writeFileSync('docs/template.html', \`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset='UTF-8'>
-              <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-              <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css'>
-              <style>
-                .markdown-body {
-                  box-sizing: border-box;
-                  min-width: 200px;
-                  max-width: 980px;
-                  margin: 0 auto;
-                  padding: 45px;
-                }
-                @media (max-width: 767px) {
-                  .markdown-body {
-                    padding: 15px;
-                  }
-                }
-                .nav-back {
-                  padding: 1rem;
-                  background: #f6f8fa;
-                  margin-bottom: 2rem;
-                  border-radius: 6px;
-                }
-                .nav-back a {
-                  color: #0366d6;
-                  text-decoration: none;
-                }
-                .nav-back a:hover {
-                  text-decoration: underline;
-                }
-              </style>
-            </head>
-            <body class='markdown-body'>
-              <div class='nav-back'>
-                <a href='..'>← Back to Guidelines</a>
-              </div>
-              {{content}}
-            </body>
-          </html>
-          \`);
-
-          // Process markdown files
-          const processMarkdownFile = (sourcePath, targetDir) => {
-            if (fs.existsSync(sourcePath)) {
-              const filename = path.basename(sourcePath);
-              const targetMdPath = path.join('docs', targetDir, filename);
-              const targetHtmlPath = targetMdPath.replace('.md', '.html');
-              
-              // Copy MD file
-              fs.copyFileSync(sourcePath, targetMdPath);
-              
-              // Convert to HTML
-              convertToHtml(sourcePath, targetHtmlPath);
-            }
-          };
-
-          // Guidelines files
-          [
-            '01-component-guidelines.md',
-            '02-scss-guidelines.md',
-            '03-template-guidelines.md',
-            '04-store-ngrx-guidelines.md',
-            '05-services-guidelines.md',
-            '06-directives-pipes-guidelines.md'
-          ].forEach(file => {
-            processMarkdownFile(
-              path.join('guidelines', file),
-              'guidelines'
-            );
-          });
-
-          // Process files
-          ['pr-submission-process.md'].forEach(file => {
-            processMarkdownFile(
-              path.join('process', file),
-              'process'
-            );
-          });
-          "
-
-      # We don't need the deploy step since we're serving directly from master/docs
+          # Upload entire repository
+          path: "."
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
