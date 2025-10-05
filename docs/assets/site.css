@@ -1,0 +1,218 @@
+/* ==== Root & Typography =================================================== */
+:root{
+  --bg: #ffffff;
+  --text: #1f2328;
+  --muted: #6a737d;
+  --accent: #0969da;
+  --accent-underline: rgba(9,105,218,.3);
+
+  --code-bg: #0f172a;        /* slate-900 */
+  --code-text: #e5e7eb;      /* slate-200 */
+  --code-border: #0b1220;
+  --code-shadow: rgba(2,6,23,.4);
+
+  --inline-bg: #f6f8fa;
+  --inline-text: #24292e;
+
+  --card: #f8fafc;
+  --card-border: #e5e7eb;
+
+  --radius: 12px;
+  --maxw: 960px;
+  --lh: 1.65;
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #0b1320;
+    --text: #e6edf3;
+    --muted: #9aa9b5;
+    --accent: #58a6ff;
+    --accent-underline: rgba(88,166,255,.35);
+
+    --inline-bg: #111827;
+    --inline-text: #e6edf3;
+
+    --card: #111827;
+    --card-border: #1f2937;
+  }
+}
+
+html{ box-sizing:border-box; scroll-behavior:smooth; }
+*,*:before,*:after{ box-sizing:inherit; }
+
+body{
+  margin:0;
+  font: 16px/var(--lh) ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+        Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color:var(--text);
+  background:var(--bg);
+}
+
+/* ==== Page Container ====================================================== */
+.page{
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+@media (min-width: 768px){
+  .page{ padding: 48px 24px 96px; }
+}
+
+/* If your HTML doesn't wrap content in .page, apply to body children */
+body > *:first-child{ margin-top:0; }
+
+/* ==== Headings & Text ===================================================== */
+h1,h2,h3,h4,h5,h6{
+  line-height:1.25;
+  letter-spacing: -.01em;
+  margin: 1.6em 0 .6em;
+}
+h1{ font-size: clamp(2rem, 1.2rem + 2.5vw, 2.75rem); }
+h2{ font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2rem); }
+h3{ font-size: 1.25rem; }
+h4{ font-size: 1.125rem; }
+
+p, ul, ol{
+  margin: .9em 0;
+}
+ul, ol{
+  padding-left: 1.4rem;
+}
+li + li{ margin-top: .25em; }
+
+a{
+  color: var(--accent);
+  text-underline-offset: .18em;
+  text-decoration-thickness: .08em;
+  text-decoration-color: var(--accent-underline);
+}
+a:hover{ text-decoration-color: currentColor; }
+
+/* Callouts via Markdown blockquotes */
+blockquote{
+  margin: 1.2em 0;
+  padding: .8em 1em;
+  border-left: 4px solid var(--accent);
+  background: var(--card);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+blockquote p{ margin: .4em 0; }
+
+/* Tables */
+table{
+  width:100%;
+  border-collapse: collapse;
+  margin: 1.25em 0;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+th, td{
+  padding: .6em .8em;
+  border-bottom: 1px solid var(--card-border);
+}
+thead th{
+  text-align:left;
+  background: linear-gradient(0deg, transparent, rgba(0,0,0,.02));
+  font-weight:600;
+}
+
+/* ==== Inline Code ========================================================= */
+code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: .95em;
+}
+p code, li code, td code{
+  background: var(--inline-bg);
+  color: var(--inline-text);
+  padding: .15em .35em;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+}
+
+/* ==== Code Blocks (fenced ```ts, etc.) =================================== */
+pre{
+  margin: 1.1em 0;
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--code-border);
+  box-shadow: 0 12px 24px -12px var(--code-shadow);
+  overflow:auto;
+}
+pre code{
+  background: transparent !important;
+  color: inherit;
+  padding: 0;
+  border: 0;
+  display: block;
+  line-height: 1.5;
+}
+
+/* Optional title bar for code blocks
+   Add <div class="code-title">filename.ts</div> before <pre> */
+.code-title{
+  background: #0b1220;
+  color: #93c5fd;
+  font: 500 12px/1.2 ui-sans-serif, system-ui, -apple-system, "Segoe UI";
+  padding: 10px 14px;
+  border: 1px solid var(--code-border);
+  border-bottom: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+/* ==== Syntax Accents (works with many generators) ========================= */
+/* Prism-style tokens */
+.token.comment,.token.prolog,.token.doctype,.token.cdata{ color:#94a3b8; }
+.token.punctuation{ color:#cbd5e1; }
+.token.keyword{ color:#93c5fd; font-weight:600; }
+.token.operator{ color:#fca5a5; }
+.token.number,.token.boolean{ color:#f9a8d4; }
+.token.string{ color:#86efac; }
+.token.function{ color:#fcd34d; }
+.token.class-name,.token.type{ color:#f8fafc; font-weight:600; }
+.token.property,.token.constant,.token.symbol{ color:#7dd3fc; }
+
+/* highlight.js common classes */
+.hljs-comment,.hljs-quote{ color:#94a3b8; }
+.hljs-keyword,.hljs-selector-tag,.hljs-subst{ color:#93c5fd; font-weight:600; }
+.hljs-literal,.hljs-number,.hljs-doctag{ color:#f9a8d4; }
+.hljs-string,.hljs-selector-attr,.hljs-selector-pseudo{ color:#86efac; }
+.hljs-title,.hljs-section{ color:#fcd34d; }
+.hljs-type,.hljs-class .hljs-title{ color:#7dd3fc; }
+.hljs-built_in,.hljs-builtin-name{ color:#fca5a5; }
+
+/* Pandoc sourceCode fallback (if used) */
+div.sourceCode, pre.sourceCode { background: var(--code-bg); }
+code span.kw { color:#93c5fd; font-weight:600; }   /* keyword */
+code span.st { color:#86efac; }                    /* string */
+code span.dv, code span.bn { color:#f9a8d4; }      /* numbers */
+code span.co { color:#94a3b8; font-style:italic; } /* comment */
+code span.fu { color:#fcd34d; }                    /* function */
+code span.op { color:#fca5a5; }                    /* operator */
+code span.va, code span.cn { color:#7dd3fc; }      /* variables/types */
+
+/* Make long identifiers wrap only at sensible points */
+pre, code{ word-wrap: normal; overflow-wrap: anywhere; }
+
+/* ==== TOC (if you generate one) ========================================== */
+#TOC, .toc{
+  background: var(--card);
+  border:1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 1.5em 0;
+}
+#TOC ul, .toc ul{ margin:.4em 0; padding-left:1.1em; }
+#TOC a, .toc a{ text-decoration:none; }
+#TOC a:hover, .toc a:hover{ text-decoration:underline; }
+
+/* ==== Utilities =========================================================== */
+hr{
+  border:0; height:1px; background:var(--card-border);
+  margin: 2em 0;
+}
+img{ max-width:100%; height:auto; border-radius:8px; }
