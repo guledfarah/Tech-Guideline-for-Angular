@@ -26,8 +26,11 @@ jobs:
           # Clean any existing files in docs directory except .gitkeep
           find docs -type f ! -name '.gitkeep' -delete
 
-      - name: Convert Markdown to HTML
+      - name: Convert Markdown to HTML and copy index
         run: |
+          # First copy the index.html
+          cp src/index.html docs/
+          
           node -e "
           const fs = require('fs');
           const marked = require('marked');
