@@ -51,7 +51,7 @@ jobs:
           #    (assets/site.css must exist at repo root so rsync put it at docs/assets/site.css)
           while IFS= read -r -d '' md; do
             html="${md%.md}.html"
-            pandoc -f gfm -t html5 -s "$md" -o "$html" -c assets/site.css
+            pandoc -f gfm -t html5 -s "$md" -o "$html" -c ../assets/site.css
           done < <(find docs -type f -name '*.md' -print0)
 
           # 3) Optional landing page

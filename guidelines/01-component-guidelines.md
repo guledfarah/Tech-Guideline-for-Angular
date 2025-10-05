@@ -322,33 +322,6 @@ export const UserActions = createActionGroup({
 });
 ```
 
-### ✅ Do: Organize Related Files in Feature Folders
-
-```
-src/
-└── app/
-    └── features/
-        └── user/
-            ├── models/
-            │   ├── user.interface.ts
-            │   ├── user-settings.interface.ts
-            │   └── user.model.ts
-            ├── enums/
-            │   ├── user-status.enum.ts
-            │   └── user-type.enum.ts
-            ├── components/
-            │   ├── user-profile/
-            │   │   ├── user-profile.component.ts
-            │   │   ├── user-profile.component.html
-            │   │   └── user-profile.component.scss
-            │   └── user-settings/
-            │       ├── user-settings.component.ts
-            │       ├── user-settings.component.html
-            │       └── user-settings.component.scss
-            └── selectors/
-                └── user-profile.selector.ts
-```
-
 ### ✅ Do: Use Separate Files for Templates and Styles When Content Exceeds 3 Lines
 
 ```typescript
@@ -529,8 +502,6 @@ export class UserProfileComponent {
 </div>
 ```
 
-````
-
 ### ❌ Don't: Compute State in Components
 
 ```typescript
@@ -546,18 +517,11 @@ export class UserProfileComponent {
     map((user) => `${user.firstName} ${user.lastName}`)
   );
 }
-````
+```
 
 ## Subscription Management
 
 ### ✅ Do: Use Async Pipe and Declarative Patterns
-
-````typescript
-@Component({
-  selector: "app-notifications",
-  template: `
-      template: `
-    ### ✅ Do: Use Signals and Declarative Patterns
 
 ```typescript
 // notification-state.interface.ts
@@ -657,18 +621,7 @@ export class NotificationsComponent {
     gap: var(--spacing-xs);
   }
 }
-````
-
-`
-  `,
-})
-export class NotificationsComponent {
-notifications$ = this.store.select(selectNotifications);
-
-constructor(private store: Store) {}
-}
-
-````
+```
 
 ### ❌ Don't: Manually Subscribe or Modify Local Properties in Subscriptions
 
@@ -696,7 +649,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 }
-````
+```
 
 ## Component Lifecycle
 
