@@ -55,7 +55,7 @@ jobs:
           function convertToHtml(mdPath, targetPath) {
             const md = fs.readFileSync(mdPath, 'utf-8');
             const html = marked.parse(md);
-            const template = fs.readFileSync('src/template.html', 'utf-8');
+            const template = fs.readFileSync('template.html', 'utf-8');
             
             // Ensure target directory exists
             ensureDirectoryExists(path.dirname(targetPath));
