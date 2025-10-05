@@ -42,8 +42,8 @@ html{ box-sizing:border-box; scroll-behavior:smooth; }
 *,*:before,*:after{ box-sizing:inherit; }
 
 body{
-  margin:0;
-  font: 16px/var(--lh) ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+  margin:2rem;
+  font: 16px/var(--lh) "96 Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
         Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   color:var(--text);
   background:var(--bg);

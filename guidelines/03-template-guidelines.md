@@ -166,82 +166,17 @@ export class BadUserProfileComponent {
   // Bad: Template needs to handle multiple conditions
 }
 
-// Good: Refactored with component-level selectors
-@Component({
-  template: `
-    @if (viewModel(); as vm) {
-      @if (vm.showEditor) {
-        <app-user-editor [user]="vm.user" />
-      }
-      @if (vm.showUpgradePrompt) {
-        <app-upgrade-prompt />
-      }
-    }
-  `,
-})
-export class GoodUserProfileComponent {
-  protected readonly viewModel = computed(() => {
-    const user = this.user();
-    if (!user || this.isLoading()) return null;
-
-    return {
-      user,
-      showEditor: this.canEdit(),
-      showUpgradePrompt: this.needsUpgrade(),
-    };
-  });
-
-  // Encapsulated logic in component-level selectors
-  private readonly canEdit = computed(
-    () => this.hasPermission("edit") && !this.isLocked()
-  );
-
-  private readonly needsUpgrade = computed(() => {
-    const sub = this.subscription();
-    return !sub || sub.isExpired;
-  });
-}
-```
-
-### ✅ Do: Create Clear View Models with Positive Conditions
-
-```typescript
-// Good: Clear, positive conditions in view model
-@Component({
-  template: `
-    @if (viewModel(); as vm) {
-    <app-user-card
-      [isActive]="vm.isActive"
-      [displayName]="vm.displayName"
-      [accessLevel]="vm.accessLevel"
-    >
-    </app-user-card>
-    }
-  `,
-})
-export class UserCardComponent {
-  protected readonly viewModel = computed(() => {
-    const user = this.user();
-    const settings = this.settings();
-    if (!user || !settings) return null;
-
-    return {
-      isActive: this.determineActiveStatus(user),
-      displayName: this.formatDisplayName(user, settings),
-      accessLevel: this.calculateAccessLevel(user),
-    };
-  });
-}
+// Refactored with component-level state selectors as shown in above "Do: Use Dedicated Selector Files for State Management" example
 ```
 
 ## A11y Best Practices
 
-### ✅ Do: Use Semantic HTML and ARIA Attributes
+### ✅ Do: Use Semantic HTML first always; ARIA attributes only when needed
 
 ```html
 <nav aria-label="Main navigation">
-  <ul role="menubar">
-    <li role="menuitem">
+  <ul>
+    <li>
       <a [routerLink]="['/dashboard']" aria-current="page"> Dashboard </a>
     </li>
   </ul>
@@ -296,49 +231,25 @@ export class UserCardComponent {
 
 ## CoreUI Integration
 
-### ✅ Do: Use CoreUI Components Correctly
+### ✅ Do: Use CoreUI Components Correctly; before you create a custom component check if it is already in coreUI
 
 ```html
-<core-card>
-  <core-card-header>
-    <h2 class="heading-2">User Profile</h2>
-  </core-card-header>
 
-  <core-card-content>
-    <core-form-field>
-      <core-label>Name</core-label>
-      <core-input [formControl]="nameControl"> </core-input>
-      <core-error *ngIf="nameControl.errors?.required">
-        Name is required
-      </core-error>
-    </core-form-field>
-  </core-card-content>
-
-  <core-card-actions>
-    <core-button variant="primary" type="submit"> Save </core-button>
-  </core-card-actions>
-</core-card>
 ```
 
 ### ❌ Don't: Mix Material and CoreUI Components
 
 ```html
 <!-- Bad: Mixing Material and CoreUI -->
-<mat-card>
-  <core-card-header>
-    <mat-form-field>
-      <input matInput [(ngModel)]="user.name" />
-    </mat-form-field>
-  </core-card-header>
-</mat-card>
 ```
 
 ## Performance Optimization
 
-### ✅ Do: Use TrackBy with NgFor
+### ✅ Do: Use Modern Control Flow Syntax
 
-````html
-### ✅ Do: Use Modern Control Flow Syntax ```html
+#### ✅ Do: Use TrackBy with For
+
+```html
 <!-- Using @if -->
 @if (user(); as currentUser) {
 <user-profile [data]="currentUser" />
@@ -367,7 +278,7 @@ export class UserCardComponent {
 $first; let isLast = $last ) {
 <app-item [data]="item" [isFirst]="isFirst" [isLast]="isLast" [position]="i" />
 }
-````
+```
 
 ### ❌ Don't: Use Legacy *ngIf, *ngFor Directives
 
@@ -415,8 +326,6 @@ $first; let isLast = $last ) {
 }
 ```
 
-````
-
 ### ❌ Don't: Perform Heavy Computations in Template
 
 ```html
@@ -425,7 +334,7 @@ $first; let isLast = $last ) {
   {{ calculateComplexTotal(order) | currency }}
   <span>{{ getFormattedDate(order.date) }}</span>
 </div>
-````
+```
 
 ## Template References
 

@@ -43,15 +43,15 @@
 
 ## Mixins and Variables
 
-### ✅ Do: Create Reusable Mixins and Use Design Tokens
+### ✅ Do: Create Reusable Mixins and variables
 
 ```scss
-// _variables.scss
+// variables.scss
 $spacing-unit: 8px;
 $primary-color: #007bff;
 $border-radius: 4px;
 
-// _mixins.scss
+// mixins.scss
 @mixin elevation($level) {
   @if $level == 1 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -102,27 +102,10 @@ $border-radius: 4px;
 
 ## CoreUI Integration
 
-### ✅ Do: Create Consistent Component Wrappers
+### ✅ Do: Prefer CoreUI standard theming
 
 ```scss
-// _core-ui.scss
-@mixin core-button-variant($background, $color) {
-  background-color: $background;
-  color: $color;
 
-  &:hover {
-    background-color: darken($background, 10%);
-  }
-}
-
-// button.component.scss
-.core-button {
-  @include core-button-variant($primary-color, white);
-
-  &--secondary {
-    @include core-button-variant($secondary-color, $text-color);
-  }
-}
 ```
 
 ### ❌ Don't: Override CoreUI Styles Directly
@@ -137,7 +120,7 @@ $border-radius: 4px;
 
 ## Accessibility
 
-### ✅ Do: Use A11y-Friendly SCSS
+### ✅ Do: Use A11y-Friendly SCSS (if needed)
 
 ```scss
 // _a11y.scss
@@ -187,10 +170,10 @@ button:focus {
 
 ## Responsive Design
 
-### ✅ Do: Use Mixins for Breakpoints
+### ✅ Do: Use Global Shared Mixins for Breakpoints
 
 ```scss
-// _breakpoints.scss
+// breakpoints.scss
 @mixin respond-to($breakpoint) {
   @if $breakpoint == "small" {
     @media (max-width: 767px) {

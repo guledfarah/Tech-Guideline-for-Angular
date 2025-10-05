@@ -6,30 +6,30 @@
 
 Before requesting team review, developers must:
 
-- [ ] Complete development and dev testing
-- [ ] Switch to "reviewer mindset" and review your own code against our guidelines:
-  - [ ] Component Guidelines
+- Complete development and dev testing
+- Switch to "reviewer mindset" and review your own code against tech guidelines:
+  - Component Guidelines
     - Single responsibility principle
     - Proper state management with selectors
     - Clean templates without logic
     - Signal-based implementations
-  - [ ] SCSS Guidelines
+  - SCSS Guidelines
     - BEM methodology
     - Proper use of variables and mixins
     - A11y considerations
-  - [ ] Template Guidelines
+  - Template Guidelines
     - Modern control flow (@if, @for)
     - No complex logic in templates
     - Proper component communication
-  - [ ] Store/NGRX Guidelines
+  - Store/NGRX Guidelines
     - Proper state management
     - Clean effects
     - Well-structured selectors
-  - [ ] Services Guidelines
+  - Services Guidelines
     - Single responsibility
     - Proper error handling
     - Clean observable patterns
-  - [ ] Directives/Pipes Guidelines
+  - Directives/Pipes Guidelines
     - Focused functionality
     - Proper lifecycle management
     - A11y considerations
@@ -75,12 +75,12 @@ Before requesting team review, developers must:
 
 Before creating the actual PR:
 
-- [ ] Implement all agreed-upon changes from team review
-- [ ] Run full test suite
-- [ ] Update Dev Test and Design Note documentation if needed
-- [ ] Ensure commit messages are clear and follow conventions
-- [ ] Double-check for any debug code or console logs
-- [ ] Enough whitespace added for clear code readability and no extra whitespaces
+- Implement all agreed-upon changes from team review
+- Run full test suite
+- Update Dev Test and Design Note documentation if needed
+- Ensure commit messages are clear and follow conventions
+- Double-check for any debug code or console logs
+- Enough whitespace added for clear code readability and no extra whitespaces
 
 ### Card Task Updates
 

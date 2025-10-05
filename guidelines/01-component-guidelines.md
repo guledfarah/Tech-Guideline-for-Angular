@@ -49,25 +49,14 @@ export class UserProfileSelectors {
 })
 export class UserProfileComponent {
   private readonly selectors = inject(UserProfileSelectors);
-  private readonly destroy = inject(DestroyRef);
+  private readonly backendService = inject(BackendService);
 
   protected readonly state = this.selectors.state;
 
-  constructor() {
-    // Setup automatic cleanup of any subscriptions
-    effect(() => {
-      const currentState = this.state();
-      if (currentState?.needsUpdate) {
-        this.refreshData();
-      }
-    }, { injector: inject(EnvironmentInjector) });
-  }
+  constructor() {}
 
-  private refreshData(): void {
-    // Example of using DestroyRef for cleanup
-    firstValueFrom(this.selectors.refreshUser()).pipe(
-      takeUntilDestroyed(this.destroy)
-    );
+  onSubmit(){
+    this.backendService.submit(this.state());
   }
 }
 
@@ -87,76 +76,50 @@ export class UserProfileComponent {
 }
 ```
 
+### ❌ Don't: Create Large, Monolithic Components
+
+```typescript
+@Component({
+  selector: "app-user-dashboard",
+  templateUrl: "./user-dashboard.component.html", // Large template with multiple responsibilities
+})
+export class UserDashboardComponent {
+  user: User;
+  orders: Order[];
+  notifications: Notification[];
+  settings: UserSettings;
+  // Many more properties...
+
+  // Multiple methods handling different concerns
+  updateUser() {
+    // state computations
+    /* ... */
+  }
+  processOrders() {
+    // rules and complex logic checks
+    /* ... */
+  }
+  handleNotifications() {
+    /* ... */
+  }
+  // More methods...
+}
+```
+
 ### ✅ Do: Use inject() Function for Dependency Injection
 
 ```typescript
-// user-profile.selector.ts
-@Injectable()
-export class UserProfileSelectors {
-  private readonly store = inject(Store);
-  private readonly userService = inject(UserService);
-  private readonly router = inject(Router);
-
-  readonly state = computed<UserProfileState | null>(() => {
-    const user = this.store.selectSignal(selectUser)();
-    if (!user) return null;
-    return this.computeState(user);
-  });
-
-  private computeState(user: User): UserProfileState {
-    // state computation
-  }
-}
-
-// user-notification.service.ts
-@Injectable({
-  providedIn: "root",
-})
-export class UserNotificationService {
-  private readonly store = inject(Store);
-  private readonly notifier = inject(NotificationService);
-  private readonly analytics = inject(AnalyticsService);
-
-  async sendNotification(userId: string, message: string): Promise<void> {
-    try {
-      await this.notifier.send(userId, message);
-      this.analytics.track("notification_sent");
-    } catch (error) {
-      this.handleError(error);
-    }
-  }
-}
-
-// feature.component.ts
 @Component({
   selector: "app-feature",
   template: "...",
-  providers: [FeatureSelectors],
 })
 export class FeatureComponent {
   private readonly selectors = inject(FeatureSelectors);
   private readonly actions = inject(Actions);
-  private readonly destroy = inject(DestroyRef);
 
   protected readonly state = this.selectors.state;
 
-  constructor() {
-    effect(() => {
-      // React to state changes
-      const currentState = this.state();
-      if (currentState?.needsUpdate) {
-        this.refreshData();
-      }
-    });
-
-    this.setupEventListeners();
-  }
-
-  private setupEventListeners(): void {
-    this.actions
-      .pipe(ofType(FeatureActions.event), takeUntilDestroyed(this.destroy))
-      .subscribe(/* handle events */);
-  }
+  constructor() {}
 }
 ```
 
@@ -177,46 +140,6 @@ export class FeatureComponent implements OnInit, OnDestroy {
     private readonly notifier: NotificationService,
     private readonly analytics: AnalyticsService
   ) {}
-
-  private subscription: Subscription;
-
-  ngOnInit() {
-    this.subscription = this.actions$
-      .pipe(ofType(FeatureActions.event))
-      .subscribe(/* handle events */);
-  }
-
-  ngOnDestroy() {
-    this.subscription?.unsubscribe();
-  }
-}
-```
-
-### ❌ Don't: Create Large, Monolithic Components
-
-```typescript
-@Component({
-  selector: "app-user-dashboard",
-  templateUrl: "./user-dashboard.component.html", // Large template with multiple responsibilities
-})
-export class UserDashboardComponent {
-  user: User;
-  orders: Order[];
-  notifications: Notification[];
-  settings: UserSettings;
-  // Many more properties...
-
-  // Multiple methods handling different concerns
-  updateUser() {
-    /* ... */
-  }
-  processOrders() {
-    /* ... */
-  }
-  handleNotifications() {
-    /* ... */
-  }
-  // More methods...
 }
 ```
 
@@ -236,20 +159,6 @@ export interface UserSettings {
   theme: "light" | "dark";
   notifications: boolean;
   language: string;
-}
-
-// user-status.enum.ts
-export enum UserStatus {
-  Active = "active",
-  Inactive = "inactive",
-  Suspended = "suspended",
-}
-
-// user-type.enum.ts
-export enum UserType {
-  Standard = "standard",
-  Premium = "premium",
-  Admin = "admin",
 }
 
 // user.model.ts
@@ -325,45 +234,6 @@ export const UserActions = createActionGroup({
 ### ✅ Do: Use Separate Files for Templates and Styles When Content Exceeds 3 Lines
 
 ```typescript
-// user-profile.interface.ts
-export interface UserProfileState {
-  user: User | null;
-  headerInfo: UserHeaderInfo;
-  activityData: UserActivityData;
-}
-
-// user-profile.selector.ts
-@Injectable()
-export class UserProfileSelectors {
-  constructor(private readonly store: Store) {}
-
-  readonly state = computed<UserProfileState | null>(() => {
-    const user = this.store.selectSignal(selectUser)();
-    if (!user) return null;
-
-    return {
-      user,
-      headerInfo: this.computeHeaderInfo(user),
-      activityData: this.computeActivityData(user)
-    };
-  });
-
-  private computeHeaderInfo(user: User): UserHeaderInfo {
-    return {
-      displayName: `${user.firstName} ${user.lastName}`,
-      avatar: user.avatarUrl,
-      role: user.role
-    };
-  }
-
-  private computeActivityData(user: User): UserActivityData {
-    return {
-      recentActivities: user.activities.slice(0, 5),
-      activityCount: user.activities.length
-    };
-  }
-}
-
 // user-profile.component.ts
 @Component({
   selector: 'app-user-profile',
@@ -521,106 +391,10 @@ export class UserProfileComponent {
 
 ## Subscription Management
 
-### ✅ Do: Use Async Pipe and Declarative Patterns
+### ✅ Do: Use Async Pipe when needed but don't repeat or overuse in single template
 
-```typescript
-// notification-state.interface.ts
-export interface NotificationState {
-  items: NotificationItem[];
-  unreadCount: number;
-  hasMore: boolean;
-}
-
-// notification-item.interface.ts
-export interface NotificationItem {
-  id: string;
-  message: string;
-  type: NotificationType;
-  timestamp: string;
-  read: boolean;
-}
-
-// notification.selector.ts
-@Injectable()
-export class NotificationSelectors {
-  private readonly notifications = this.store.selectSignal(selectNotifications);
-  private readonly preferences = this.store.selectSignal(selectNotificationPreferences);
-
-  constructor(private readonly store: Store) {}
-
-  readonly state = computed<NotificationState | null>(() => {
-    const items = this.notifications();
-    if (!items) return null;
-
-    return {
-      items: this.sortNotifications(items),
-      unreadCount: this.countUnread(items),
-      hasMore: items.length >= 10
-    };
-  });
-
-  private sortNotifications(items: NotificationItem[]): NotificationItem[] {
-    return [...items].sort((a, b) =>
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-  }
-
-  private countUnread(items: NotificationItem[]): number {
-    return items.filter(n => !n.read).length;
-  }
-}
-
-// notifications.component.ts
-@Component({
-  selector: 'app-notifications',
-  templateUrl: './notifications.component.html',
-  styleUrls: ['./notifications.component.scss'],
-  providers: [NotificationSelectors]
-})
-export class NotificationsComponent {
-  protected readonly state = inject(NotificationSelectors).state;
-}
-
-// notifications.component.html
-<div class="notifications-panel" @if="state(); as vm">
-  <header class="panel-header">
-    <h2>Notifications ({{ vm.unreadCount }})</h2>
-  </header>
-
-  <section class="notification-list">
-    @for (item of vm.items; track item.id) {
-      <app-notification-item
-        [data]="item"
-      />
-    } @empty {
-      <app-empty-state
-        message="No notifications yet"
-      />
-    }
-  </section>
-
-  @if (vm.hasMore) {
-    <app-load-more-button />
-  }
-</div>
-
-// notifications.component.scss
-.notifications-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-
-  .panel-header {
-    padding: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .notification-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-  }
-}
+```html
+<app-user-header [user]="user$ | async"> </app-user-header>
 ```
 
 ### ❌ Don't: Manually Subscribe or Modify Local Properties in Subscriptions
