@@ -51,7 +51,7 @@ jobs:
           while IFS= read -r -d '' md; do
             html="${md%.md}.html"
             # Use GitHub-Flavored Markdown -> HTML5, standalone pages
-            pandoc -f gfm -t html5 -s "$md" -o "$html" -c /assets/site.css
+            pandoc -f gfm -t html5 -s "$md" -o "$html" -c assets/site.css
           done < <(find docs -type f -name '*.md' -print0)
 
           # 4) Optional: if there's a README at the root, make it the landing page
