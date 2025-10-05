@@ -29,7 +29,11 @@ jobs:
       - name: Convert Markdown to HTML and copy index
         run: |
           # First copy the index.html
-          cp src/index.html docs/
+          cp -v src/index.html docs/
+          
+          # List contents to verify
+          ls -la src/
+          ls -la docs/
 
           node -e "
           const fs = require('fs');
